@@ -1,0 +1,9 @@
+{
+    "Name":"Takina",
+    "Host":"127.0.0.1",
+    "TcpPort":7171,
+    "MaxConn":36,
+    "WorkerPoolSize":36,
+    "LogDir": "./mylog",
+    "LogFile":"zinx.log"
+}

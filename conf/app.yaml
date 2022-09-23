@@ -1,0 +1,11 @@
+server-name: Takina
+server-address: 127.0.0.1
+server-port: 7400
+auth-key: Test
+
+client-notes: 
+  - 
+    user: yeuoly
+    pass: yeuoly
+    address: 127.0.0.1
+    port: 25580

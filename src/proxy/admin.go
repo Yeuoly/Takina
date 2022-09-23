@@ -93,6 +93,9 @@ func (f *FrpAdmin) Reload(note *FrpcNote) error {
 		return err
 	}
 
+	//wait 1s to ensure config file is written
+	time.Sleep(time.Second)
+
 	//reload
 	_, err = ReloadFrp(note)
 	if err != nil {

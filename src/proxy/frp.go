@@ -20,11 +20,13 @@ type Proxy struct {
 
 func (c *Proxy) GenerateConfigContent() string {
 	content := `
+
 [` + c.Id + `]
 type = ` + c.Type + `
 local_ip = ` + c.Laddr + `
 local_port = ` + strconv.Itoa(c.Lport) + `
 remote_port = ` + strconv.Itoa(c.Rport) + `
+
 `
 	return content
 }
@@ -128,7 +130,9 @@ func loadDefaultProxy() {
 		}
 
 		//ensure only 1 line break in the end
-		config_content = strings.TrimRight(config_content, "\n")
+		if strings.HasSuffix(config_content, "\n\n") {
+			config_content = config_content[:len(config_content)-1]
+		}
 
 		globalConfig.ClientNotes[i].OriginalConfig = "[common]" + config_content
 		result := GetFrpStatus(&globalConfig.ClientNotes[i])

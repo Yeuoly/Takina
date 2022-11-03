@@ -113,6 +113,7 @@ func (f *FrpAdmin) CheckAndSync(note *FrpcNote) (err error) {
 		note.CurrentProxy = make(map[string]Proxy)
 		for _, i := range result.Tcp {
 			if i.Status == "wait start" {
+				started = false
 				break
 			}
 			started = true

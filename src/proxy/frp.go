@@ -1,12 +1,9 @@
 package proxy
 
 import (
-	"io/ioutil"
 	"strconv"
 	"strings"
 	"sync"
-
-	yaml "gopkg.in/yaml.v2"
 )
 
 type Proxy struct {
@@ -97,17 +94,6 @@ type TakinaConfig struct {
 
 var globalConfig TakinaConfig
 
-func parseConfig() {
-	data, err := ioutil.ReadFile("conf/app.yaml")
-	if err != nil {
-		panic(err)
-	}
-	err = yaml.Unmarshal(data, &globalConfig)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func loadDefaultProxy() {
 	// load orginal config and current proxy
 	for i := range globalConfig.ClientNotes {
@@ -147,11 +133,6 @@ func loadDefaultProxy() {
 			}
 		}
 	}
-}
-
-func init() {
-	parseConfig()
-	loadDefaultProxy()
 }
 
 func GetConfig() TakinaConfig {

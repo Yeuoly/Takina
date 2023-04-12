@@ -1,0 +1,8 @@
+server-name: Takina # server name for takina
+token: testtest # token use to conmunicate between cli and daemon-client
+
+nodes: 
+  - 
+    address: 127.0.0.1 # takina server address
+    port: 25580 # takina server port
+    token: test # takina server token

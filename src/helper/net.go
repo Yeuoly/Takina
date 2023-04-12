@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 )
@@ -78,4 +79,20 @@ func HttpPut(uri string, data string, headers map[string]string) (string, error)
 		return "", err
 	}
 	return string(body), nil
+}
+
+func GetAvaliablePort() (int, error) {
+	address, err := net.ResolveTCPAddr("tcp", "0.0.0.0:0")
+	if err != nil {
+		return 0, err
+	}
+
+	listener, err := net.ListenTCP("tcp", address)
+
+	if err != nil {
+		return 0, err
+	}
+
+	defer listener.Close()
+	return listener.Addr().(*net.TCPAddr).Port, nil
 }

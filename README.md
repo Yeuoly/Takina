@@ -1,10 +1,9 @@
 # Takina
+Takina is a proxy tool developed by Yeuoly for doing Docker cluster intranet penetration. Its name comes from Takina in \"Lycoris Recoil\".
 
-Takina is a proxy tool developed by Yeuoly for doing Docker cluster intranet penetration. The name comes from Takina, a character in \"Lycoris Recoil\".
+[README](README.md) | [Chinese Documentation](README_cn.md)
 
-[README](README.md) | [中文文档](README_cn.md)
-
-When the Docker network is in Internal mode, the PublishPort function will be disabled. This means that if we want to achieve intranet penetration through the traditional host port mapping method, it will become difficult. However, when one door closes, another opens. Containers can access the internet, so we can add a container for port forwarding (reverse proxy) in the network. It is responsible for forwarding external traffic to various nodes in the network.
+As we know, when the Docker network is in Internal mode and the network mode is overlay, the PublishPort function will not work. This means that it will be difficult to achieve intranet penetration through traditional host port mapping. However, when God closes a door, he always opens a window. Containers can connect to multiple networks. Therefore, we can connect a container for port forwarding (reverse proxy) in the network, which is responsible for forwarding external traffic to various nodes in the network.
 
 Takina has several basic components:
 
@@ -12,21 +11,22 @@ Takina has several basic components:
 - TakinaClientDaemon
 - TakinaClientCli
 
-You can find the entry points for each component in `/cmd/*`.
+You can see the entry of each component in `/cmd/*`.
 
-If you want to use Takina more conveniently, you can use the Kisara project. It encapsulates Takina and is itself a distributed Docker scheduling tool that provides convenient API interfaces.
+Takina is designed as a distributed tool. The client runs in a container, which needs to connect to all the networks that need to be penetrated, and also connects to the default Docker network. Of course, if you like, you can also build a network yourself, but this network needs to be able to connect to the Internet so that Takina can receive traffic from outside.
+
+When traffic arrives at TakinaServer, it will forward the traffic to the corresponding TakinaClientDaemon, and TakinaClientDaemon will then forward the traffic to the corresponding network. Therefore, TakinaClientDaemon needs to connect to all the networks that need to be penetrated, so that it can ensure that the container network can achieve intranet penetration while in an isolated state and cannot be sensed from the outside.
+
+If you want to use Takina more conveniently, you can use the Kisara project, which encapsulates Takina and Kisara itself is a distributed Docker scheduling tool that provides convenient API interfaces.
 
 ## TakinaServer
-
-One important task of Takina is load balancing. Sometimes we have three public machines that serve as traffic entry points and are responsible for forwarding traffic to containers. There can be multiple servers, but they need to be configured in the client.
+One of the important tasks of Takina is load balancing. Sometimes we have three public machines that serve as traffic entry points and are responsible for forwarding traffic to the container. There can be multiple servers, but configuration needs to be done in the client.
 
 ## TakinaClientDaemon
-
-Ultimately, Takina needs to be deployed inside the container. ClientDaemon is the client responsible for traffic forwarding. It will be suspended in the background for a long time and receive commands from TakinaClientCli.
+In the end, Takina needs to be deployed inside the container. ClientDaemon is the client responsible for traffic forwarding. It will be suspended in the background for a long time and receive commands from TakinaClientCli.
 
 ## TakinaClientCli
-
-After the container starts, the network to the control side is fully isolated, and the only communication methods are command execution or virtual files. Takina uses command execution for access. The control side issues commands, and ClientCli is responsible for receiving the commands from the control side and forwarding them to ClientDaemon.
+Because the network to the control end is fully isolated after the container starts, the communication method is only command execution or virtual files. Takina uses command execution for access, and the control end sends commands, while ClientCli is responsible for receiving commands from the control end and forwarding them to ClientDaemon.
 
 ## Third-party libraries Thanks
 

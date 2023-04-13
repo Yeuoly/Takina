@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 func HttpGet(url string, headers map[string]string) (string, error) {
@@ -95,4 +96,20 @@ func GetAvaliablePort() (int, error) {
 
 	defer listener.Close()
 	return listener.Addr().(*net.TCPAddr).Port, nil
+}
+
+func TestPortAvailable(port int) bool {
+	address, err := net.ResolveTCPAddr("tcp", "0.0.0.0:"+strconv.Itoa(port))
+	if err != nil {
+		return false
+	}
+
+	listener, err := net.ListenTCP("tcp", address)
+
+	if err != nil {
+		return false
+	}
+
+	defer listener.Close()
+	return true
 }

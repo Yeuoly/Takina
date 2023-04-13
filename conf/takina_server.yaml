@@ -1,0 +1,2 @@
+server-name: Takina # server name for takina
+token: testtest # token use to conmunicate between cli and daemon-client

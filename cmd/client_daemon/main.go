@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/Yeuoly/Takina/src/server"
+	client "github.com/Yeuoly/Takina/src/client"
 )
 
 func main() {
-	server.InitTakinaClientDaemon()
-	server.GetTakina().Run()
+	client.InitTakinaClientDaemon()
+	client.GetTakina().Run()
 }

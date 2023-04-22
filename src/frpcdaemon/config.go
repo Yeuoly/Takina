@@ -5,7 +5,6 @@ import (
 	"io"
 	"sync"
 
-	takina "github.com/Yeuoly/Takina"
 	"github.com/Yeuoly/Takina/src/helper"
 	"github.com/Yeuoly/Takina/src/types"
 	go_memexec "github.com/amenzhinsky/go-memexec"
@@ -58,7 +57,7 @@ func LaunchFrpcDaemon(configs []*types.FrpcConfig) ([]*types.FrpcConfig, error) 
 		frpc_file.Close()
 
 		// launch frpc
-		frpc, err := go_memexec.New(takina.FrpcEmbed)
+		frpc, err := go_memexec.New(frpcEmbed)
 		if err != nil {
 			return nil, err
 		}

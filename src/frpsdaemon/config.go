@@ -5,7 +5,6 @@ import (
 	"io"
 	"sync"
 
-	takina "github.com/Yeuoly/Takina"
 	"github.com/Yeuoly/Takina/src/helper"
 	"github.com/Yeuoly/Takina/src/types"
 	go_memexec "github.com/amenzhinsky/go-memexec"
@@ -24,12 +23,6 @@ token = %s
 // the return value is the config with admin info
 func LaunchFrpsDaemon(config *types.FrpsConfig) (*types.FrpsConfig, error) {
 	token := helper.RandomStr(16)
-	admin_port, err := helper.GetAvaliablePort()
-	if err != nil {
-		return nil, err
-	}
-
-	config.BindPort = admin_port
 	config.Token = token
 
 	frpc_config_content := generateFrpsConfig(config)
@@ -48,7 +41,7 @@ func LaunchFrpsDaemon(config *types.FrpsConfig) (*types.FrpsConfig, error) {
 	frps_file.Close()
 
 	// launch frps
-	frps, err := go_memexec.New(takina.FrpcEmbed)
+	frps, err := go_memexec.New(frpsEmbed)
 	if err != nil {
 		return nil, err
 	}

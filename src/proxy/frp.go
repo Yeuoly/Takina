@@ -4,18 +4,13 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/Yeuoly/Takina/src/types"
 )
 
-type Proxy struct {
-	Id    string `json:"id"`
-	Laddr string `json:"laddr"`
-	Lport int    `json:"lport"`
-	Raddr string `json:"raddr"`
-	Rport int    `json:"rport"`
-	Type  string `json:"type"`
-}
+type Proxy = types.Proxy
 
-func (c *Proxy) GenerateConfigContent() string {
+func GenerateConfigContent(c *Proxy) string {
 	content := `
 
 [` + c.Id + `]

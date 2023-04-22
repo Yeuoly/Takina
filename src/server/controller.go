@@ -1,54 +1,51 @@
 package server
 
 import (
+	"github.com/Yeuoly/Takina/src/helper"
 	"github.com/Yeuoly/Takina/src/types"
-	"github.com/Yeuoly/zinx/ziface"
+	"github.com/gin-gonic/gin"
 )
 
-func BaiscController[T any](req ziface.IRequest, success func(T, ziface.IConnection)) {
-	data := req.GetData()
-	request := types.ParseTakinaRequest[T](data)
-	if request == nil {
-		req.GetConnection().Send(types.ErrorResponse("unsupported request").JsonBytes())
-	} else {
+func BaiscController[T any](r *gin.Context, success func(T)) {
+	helper.BindRequest(r, func(request types.TakinaRequest[T]) {
 		if !GetTakina().Auth(request.Token) {
-			req.GetConnection().Send(types.ErrorResponse("invalid token").JsonBytes())
+			r.JSON(200, types.ErrorResponse(-403, "token error"))
 		} else {
-			success(request.Data, req.GetConnection())
+			success(request.Data)
 		}
-	}
+	})
 }
 
-func (router *TakinaServerGetFrpsConfig) Handle(req ziface.IRequest) {
-	BaiscController(req, func(data types.TakinaRequestGetFrpsConfig, conn ziface.IConnection) {
+func TakinaServerGetFrpsConfig(r *gin.Context) {
+	BaiscController(r, func(request types.TakinaRequestGetFrpsConfig) {
 		config := GetTakina().GetFrpsConfig()
-		conn.Send(types.SuccessResponse(types.TakinaResponseGetFrpsConfig{
+		r.JSON(200, types.SuccessResponse(types.TakinaResponseGetFrpsConfig{
 			BindPort: config.BindPort,
 			Token:    config.Token,
-		}).JsonBytes())
+		}))
 	})
 }
 
-func (router *TakinaServerGetPort) Handle(req ziface.IRequest) {
-	BaiscController(req, func(data types.TakinaRequestGetPort, conn ziface.IConnection) {
+func TakinaServerGetPort(r *gin.Context) {
+	BaiscController(r, func(request types.TakinaRequestGetPort) {
 		port, err := GetTakina().requestAvailablePort()
 		if err != nil {
-			conn.Send(types.ErrorResponse(err.Error()).JsonBytes())
+			r.JSON(200, types.ErrorResponse(-500, err.Error()))
 		} else {
-			conn.Send(types.SuccessResponse(types.TakinaResponseGetPort{
+			r.JSON(200, types.SuccessResponse(types.TakinaResponseGetPort{
 				Port: port,
-			}).JsonBytes())
+			}))
 		}
 	})
 }
 
-func (couter *TakinaServerReleasePort) Handle(req ziface.IRequest) {
-	BaiscController(req, func(data types.TakinaRequestReleasePort, conn ziface.IConnection) {
-		err := GetTakina().releasePort(data.Port)
+func TakinaServerReleasePort(r *gin.Context) {
+	BaiscController(r, func(request types.TakinaRequestReleasePort) {
+		err := GetTakina().releasePort(request.Port)
 		if err != nil {
-			conn.Send(types.ErrorResponse(err.Error()).JsonBytes())
+			r.JSON(200, types.ErrorResponse(-500, err.Error()))
 		} else {
-			conn.Send(types.SuccessResponse(types.TakinaResponseReleasePort{}).JsonBytes())
+			r.JSON(200, types.SuccessResponse(types.TakinaResponseReleasePort{}))
 		}
 	})
 }

@@ -1,54 +1,51 @@
 package server
 
 import (
+	"github.com/Yeuoly/Takina/src/helper"
 	"github.com/Yeuoly/Takina/src/types"
-	"github.com/Yeuoly/zinx/ziface"
+	"github.com/gin-gonic/gin"
 )
 
-func BaiscController[T any](req ziface.IRequest, success func(T, ziface.IConnection)) {
-	data := req.GetData()
-	request := types.ParseTakinaRequest[T](data)
-	if request == nil {
-		req.GetConnection().Send(types.ErrorResponse("unsupported request").JsonBytes())
-	} else {
-		if !GetTakina().Auth(request.Token) {
-			req.GetConnection().Send(types.ErrorResponse("invalid token").JsonBytes())
+func BaiscController[T any](r *gin.Context, success func(T)) {
+	helper.BindRequest(r, func(request types.TakinaRequest[T]) {
+		if GetTakina().Auth(request.Token) {
+			r.JSON(200, types.ErrorResponse(-403, "token error"))
 		} else {
-			success(request.Data, req.GetConnection())
+			success(request.Data)
 		}
-	}
+	})
 }
 
-func (router *TakinaClientDeamonRequestStartProxy) Handle(req ziface.IRequest) {
-	BaiscController(req, func(data types.TakinaRequestStartProxy, conn ziface.IConnection) {
+func TakinaClientDeamonRequestStartProxy(r *gin.Context) {
+	BaiscController(r, func(data types.TakinaRequestStartProxy) {
 		raddr, rport, err := addProxy(data.Laddr, data.Lport, data.ProxyType)
 		if err != nil {
-			conn.Send(types.ErrorResponse(err.Error()).JsonBytes())
+			r.JSON(200, types.ErrorResponse(-500, err.Error()))
 		} else {
-			conn.Send(types.SuccessResponse(types.TakinaResponseStartProxy{
+			r.JSON(200, types.SuccessResponse(types.TakinaResponseStartProxy{
 				Raddr: raddr,
 				Rport: rport,
-			}).JsonBytes())
+			}))
 		}
 	})
 }
 
-func (router *TakinaClientDeamonRequestStopProxy) Handle(req ziface.IRequest) {
-	BaiscController(req, func(data types.TakinaRequestStopProxy, conn ziface.IConnection) {
+func TakinaClientDeamonRequestStopProxy(r *gin.Context) {
+	BaiscController(r, func(data types.TakinaRequestStopProxy) {
 		err := delProxy(data.Laddr, data.Lport)
 		if err != nil {
-			conn.Send(types.ErrorResponse(err.Error()).JsonBytes())
+			r.JSON(200, types.ErrorResponse(-500, err.Error()))
 		} else {
-			conn.Send(types.SuccessResponse(types.TakinaResponseStopProxy{}).JsonBytes())
+			r.JSON(200, types.SuccessResponse(types.TakinaResponseStopProxy{}))
 		}
 	})
 }
 
-func (router *TakinaClientDeamonRequestListProxy) Handle(req ziface.IRequest) {
-	BaiscController(req, func(data types.TakinaRequestListProxy, conn ziface.IConnection) {
+func TakinaClientDeamonRequestListProxy(r *gin.Context) {
+	BaiscController(r, func(data types.TakinaRequestListProxy) {
 		proxies := listProxy()
-		conn.Send(types.SuccessResponse(types.TakinaResponseListProxy{
+		r.JSON(200, types.SuccessResponse(types.TakinaResponseListProxy{
 			Proxies: proxies,
-		}).JsonBytes())
+		}))
 	})
 }

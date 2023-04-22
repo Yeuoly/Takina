@@ -84,7 +84,7 @@ func (f *FrpAdmin) Reload(note *FrpcNote) error {
 	//generate config file content
 	content := note.OriginalConfig
 	for _, i := range note.CurrentProxy {
-		content += i.GenerateConfigContent()
+		content += GenerateConfigContent(&i)
 	}
 
 	//write config file

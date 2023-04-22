@@ -1,7 +1,7 @@
 package server
 
 import (
-	"time"
+	"fmt"
 
 	"github.com/Yeuoly/Takina/src/frpcdaemon"
 	"github.com/Yeuoly/Takina/src/helper"
@@ -13,12 +13,14 @@ func (c *Takina) InitFrpcConfig(node TakinaNode) (*types.FrpcConfig, error) {
 		ServerAddr: node.Address,
 	}
 
-	resp, err := helper.SendZinxAndParse[types.TakinaResponseWarp[types.TakinaResponseGetFrpsConfig]](
-		node.Address,
-		node.Port,
-		types.ROUTER_TAKINA_SERVER_GET_FRPS_CONFIG,
-		helper.ZinxRequestWithTimeout(time.Second*2),
+	resp, err := helper.SendGetAndParse[types.TakinaResponseWarp[types.TakinaResponseGetFrpsConfig]](
+		node.GenerateUrl(types.ROUTER_TAKINA_SERVER_GET_FRPS_CONFIG),
+		helper.HttpPayloadJson(GetPackedRequest(c, types.TakinaRequestGetFrpsConfig{})),
+		helper.HttpTimeout(2000),
 	)
+
+	fmt.Println(resp)
+
 	if err != nil {
 		return nil, err
 	}

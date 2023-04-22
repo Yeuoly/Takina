@@ -7,7 +7,13 @@ import (
 )
 
 func (c *Takina) InitFrpsDaemonConfig() {
+	c.Frps = &types.FrpsConfig{}
 	c.Frps.BindAddr = "0.0.0.0"
+	port, err := c.requestAvailablePort()
+	if err != nil {
+		helper.Panic("[Takina] failed to request available port: %s when launch frps", err.Error())
+	}
+	c.Frps.BindPort = port
 }
 
 func (c *Takina) RunFrpsDeamon() {

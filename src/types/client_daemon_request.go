@@ -1,9 +1,5 @@
 package types
 
-import (
-	"github.com/Yeuoly/Takina/src/proxy"
-)
-
 type TakinaRequestStartProxy struct {
 	ProxyType string `json:"proxy_type"`
 	Laddr     string `json:"laddr"`
@@ -25,5 +21,5 @@ type TakinaResponseStopProxy struct{}
 type TakinaRequestListProxy struct{}
 
 type TakinaResponseListProxy struct {
-	Proxies []proxy.Proxy `json:"proxies"`
+	Proxies []Proxy `json:"proxies"`
 }

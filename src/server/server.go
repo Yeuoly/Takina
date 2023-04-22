@@ -2,6 +2,7 @@ package server
 
 import (
 	"container/list"
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -9,14 +10,15 @@ import (
 
 	"github.com/Yeuoly/Takina/src/helper"
 	"github.com/Yeuoly/Takina/src/types"
-	"github.com/Yeuoly/zinx/zlog"
-	"github.com/Yeuoly/zinx/znet"
+	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 )
 
 type Takina struct {
 	Token            string `yaml:"token"`
 	PortRange        string `yaml:"port_range"`
+	ServerName       string `yaml:"server_name"`
+	TakinaPort       int    `yaml:"takina_port"`
 	RealPortRange    []int
 	PortPool         *list.List
 	requestPortMutex sync.Mutex
@@ -85,16 +87,39 @@ func InitTakinaServer() {
 	for _, port := range global_takina_instance.RealPortRange {
 		global_takina_instance.PortPool.PushBack(port)
 	}
+
+	// check if server name is empty
+	if global_takina_instance.ServerName == "" {
+		helper.Panic("[Takina] Please ensure server name is correct")
+	}
+
+	// check if token is empty
+	if global_takina_instance.Token == "" {
+		helper.Panic("[Takina] Please ensure token is correct, empty token will cause security issue")
+	}
+
+	// check if takina port is empty
+	if global_takina_instance.TakinaPort == 0 {
+		helper.Panic("[Takina] Please ensure takina port is correct")
+	}
+}
+
+func (root *Takina) setupRouter(r *gin.Engine) {
+	r.GET(types.ROUTER_TAKINA_SERVER_GET_FRPS_CONFIG, TakinaServerGetFrpsConfig)
+	r.POST(types.ROUTER_TAKINA_SERVER_REQUEST_PORT, TakinaServerGetPort)
+	r.POST(types.ROUTER_TAKINA_SERVER_RELEASE_PORT, TakinaServerReleasePort)
 }
 
 func (root *Takina) Run() {
 	// Launch frpc daemon
 	root.RunFrpsDeamon()
 
-	// launch zinx server and listen
-	zlog.SetLogger(new(zinxLogger))
-	server := znet.NewServer()
-	server.Serve()
+	// launch server and listen
+	server := gin.Default()
+	root.setupRouter(server)
+	gin.SetMode(gin.ReleaseMode)
+
+	server.Run(fmt.Sprintf(":%d", root.TakinaPort))
 }
 
 func GetTakina() *Takina {

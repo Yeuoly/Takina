@@ -67,6 +67,6 @@ func SuccessResponse(data any) *TakinaResponse {
 	return &TakinaResponse{Code: 0, Msg: "success", Data: data}
 }
 
-func ErrorResponse(msg string) *TakinaResponse {
-	return &TakinaResponse{Code: -1, Msg: msg}
+func ErrorResponse(code int, msg string) *TakinaResponse {
+	return &TakinaResponse{Code: code, Msg: msg}
 }

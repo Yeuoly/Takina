@@ -1,2 +1,4 @@
-server-name: Takina # server name for takina
+server_name: Takina # server name for takina
 token: testtest # token use to conmunicate between cli and daemon-client
+port_range: 20000-50000
+takina_port: 40001

@@ -26,19 +26,10 @@ func (a *Api) basicHeader(user string, pwd string) map[string]string {
 	}
 }
 
-func (a *Api) parseResult(src string) map[string]interface{} {
-	var result map[string]interface{}
-	err := json.Unmarshal([]byte(src), &result)
-	if err != nil {
-		fmt.Errorf("parse result error: %s", err)
-	}
-	return result
-}
-
 func (a *Api) getFrpStatus(note *FrpcNote) string {
 	resp, err := helper.HttpGet("http://"+note.Address+":"+strconv.Itoa(note.Port)+"/api/status", a.basicHeader(note.User, note.Pass))
 	if err != nil {
-		fmt.Errorf("get frp status error: %s", err)
+		fmt.Printf("get frp status error: %s", err)
 		return ""
 	}
 
@@ -48,7 +39,7 @@ func (a *Api) getFrpStatus(note *FrpcNote) string {
 func (a *Api) getFrpConfig(note *FrpcNote) string {
 	resp, err := helper.HttpGet("http://"+note.Address+":"+strconv.Itoa(note.Port)+"/api/config", a.basicHeader(note.User, note.Pass))
 	if err != nil {
-		fmt.Errorf("get frp config error: %s", err)
+		fmt.Printf("get frp config error: %s", err)
 		return ""
 	}
 	return resp
@@ -57,7 +48,7 @@ func (a *Api) getFrpConfig(note *FrpcNote) string {
 func (a *Api) putFrpConfig(note *FrpcNote, config string) (string, error) {
 	resp, err := helper.HttpPut("http://"+note.Address+":"+strconv.Itoa(note.Port)+"/api/config", config, a.basicHeader(note.User, note.Pass))
 	if err != nil {
-		fmt.Errorf("put frp config error: %s", err)
+		fmt.Printf("put frp config error: %s", err)
 		return "", err
 	}
 	return resp, nil
@@ -66,7 +57,7 @@ func (a *Api) putFrpConfig(note *FrpcNote, config string) (string, error) {
 func (a *Api) reloadFrp(note *FrpcNote) (string, error) {
 	resp, err := helper.HttpGet("http://"+note.Address+":"+strconv.Itoa(note.Port)+"/api/reload", a.basicHeader(note.User, note.Pass))
 	if err != nil {
-		fmt.Errorf("reload frp error: %s", err)
+		fmt.Printf("reload frp error: %s", err)
 		return "", err
 	}
 	return resp, nil

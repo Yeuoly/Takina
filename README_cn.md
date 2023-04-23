@@ -32,5 +32,5 @@ Takina有一个重要的任务就是负载均衡，我们有时候有3台公网�
 
 # Third-party libraries Thanks
 
-- [github.com/aceld/zinx](https://github.com/aceld/zinx)
+- [github.com/gin-gonic/gin](https://github.com/gin-gonic/gin)
 - [github.com/fatedier/frp](https://github.com/fatedier/frp)

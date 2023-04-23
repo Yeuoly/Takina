@@ -30,5 +30,5 @@ Because the network to the control end is fully isolated after the container sta
 
 ## Third-party libraries Thanks
 
-- [github.com/aceld/zinx](https://github.com/aceld/zinx)
+- [github.com/gin-gonic/gin](https://github.com/gin-gonic/gin)
 - [github.com/fatedier/frp](https://github.com/fatedier/frp)

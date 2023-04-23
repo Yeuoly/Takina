@@ -4,6 +4,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"path"
 	"strconv"
 	"time"
 )
@@ -40,4 +41,29 @@ func CreateTempDir() (string, func(), error) {
 		// remove the temp dir
 		os.RemoveAll(dir)
 	}, nil
+}
+
+func WriteToFile(dir string, filename string, reader io.Reader) error {
+	// create dir
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		return err
+	}
+
+	// create file
+	file, err := os.Create(path.Join(dir, filename))
+	if err != nil {
+		return err
+	}
+
+	// write to file
+	if _, err := io.Copy(file, reader); err != nil {
+		return err
+	}
+
+	// close
+	if err := file.Close(); err != nil {
+		return err
+	}
+
+	return nil
 }

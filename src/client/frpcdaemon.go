@@ -71,3 +71,13 @@ func (c *Takina) RandomNode() (*TakinaNode, error) {
 	idx := rand.Intn(len(c.Nodes))
 	return &c.Nodes[idx], nil
 }
+
+func (c *Takina) GetNodeByAddress(address string) (*TakinaNode, error) {
+	for _, node := range c.Nodes {
+		if node.Address == address {
+			return &node, nil
+		}
+	}
+
+	return nil, errors.New("node not found")
+}

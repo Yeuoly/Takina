@@ -70,3 +70,7 @@ func SuccessResponse(data any) *TakinaResponse {
 func ErrorResponse(code int, msg string) *TakinaResponse {
 	return &TakinaResponse{Code: code, Msg: msg}
 }
+
+func SuccessResponseWarp[T any](data T) *TakinaResponseWarp[T] {
+	return &TakinaResponseWarp[T]{Code: 0, Msg: "success", Data: data}
+}

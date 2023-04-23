@@ -33,6 +33,7 @@ func TakinaClientDeamonRequestStartProxy(r *gin.Context) {
 func TakinaClientDeamonRequestStopProxy(r *gin.Context) {
 	BaiscController(r, func(data types.TakinaRequestStopProxy) {
 		err := delProxy(data.Laddr, data.Lport)
+		// release port
 		if err != nil {
 			r.JSON(200, types.ErrorResponse(-500, err.Error()))
 		} else {

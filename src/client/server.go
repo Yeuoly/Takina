@@ -33,12 +33,12 @@ var global_takina_instance Takina
 func InitTakinaClientDaemon() {
 	data, err := ioutil.ReadFile("conf/takina_client.yaml")
 	if err != nil {
-		helper.Panic("[Takina] failed to read takina.yaml: %s", err.Error())
+		helper.Panic("[Takina] failed to read takina_client.yaml: %s", err.Error())
 	}
 
 	err = yaml.Unmarshal(data, &global_takina_instance)
 	if err != nil {
-		helper.Panic("[Takina] failed to unmarshal takina.yaml: %s", err.Error())
+		helper.Panic("[Takina] failed to unmarshal takina_client.yaml: %s", err.Error())
 	}
 
 	if global_takina_instance.TakinaPort == 0 {

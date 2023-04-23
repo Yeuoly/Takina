@@ -61,7 +61,7 @@ func (f *FrpAdmin) LaunchProxy(note *FrpcNote, laddr string, lport int, raddr st
 	return nil
 }
 
-func (f *FrpAdmin) StopProxy(note *FrpcNote, laddr string, lport int) error {
+func (f *FrpAdmin) StopProxy(note *FrpcNote, laddr string, lport int) (string, int, error) {
 	note.mtx.RLock()
 	for _, i := range note.CurrentProxy {
 		if i.Laddr == laddr && i.Lport == lport {
@@ -71,13 +71,13 @@ func (f *FrpAdmin) StopProxy(note *FrpcNote, laddr string, lport int) error {
 			note.mtx.Unlock()
 			err := f.Reload(note)
 			if err != nil {
-				return err
+				return "", 0, err
 			}
-			return nil
+			return i.Raddr, i.Rport, nil
 		}
 	}
 	note.mtx.RUnlock()
-	return errors.New("proxy not found")
+	return "", 0, errors.New("proxy not found")
 }
 
 func (f *FrpAdmin) Reload(note *FrpcNote) error {
@@ -170,18 +170,18 @@ func LaunchProxy(node *FrpcNote, laddr string, lport int, raddr string, rport in
 	return defaultAdmin.LaunchProxy(node, laddr, lport, raddr, rport, protocol)
 }
 
-func StopProxy(laddr string, lport int) error {
+func StopProxy(laddr string, lport int) (string, int, error) {
 	//for each to find proxy
 	for i := range globalConfig.ClientNotes {
-		err := defaultAdmin.StopProxy(&globalConfig.ClientNotes[i], laddr, lport)
+		raddr, rport, err := defaultAdmin.StopProxy(&globalConfig.ClientNotes[i], laddr, lport)
 		if err == nil {
-			return nil
+			return raddr, rport, nil
 		}
 		if err.Error() != "proxy not found" {
-			return err
+			return "", 0, err
 		}
 	}
-	return errors.New("proxy not found")
+	return "", 0, errors.New("proxy not found")
 }
 
 func GetProxies() []Proxy {

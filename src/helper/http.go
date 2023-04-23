@@ -155,6 +155,8 @@ func buildHttpRequest(method string, url string, options ...HttpOptions) (*http.
 		return nil, nil, err
 	}
 
+	client.Timeout = time.Duration(time.Millisecond * 5000)
+
 	for _, option := range options {
 		switch option.Type {
 		case "timeout":

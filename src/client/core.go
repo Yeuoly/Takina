@@ -38,7 +38,35 @@ func addProxy(laddr string, lport int, protocol string) (string, int, error) {
 }
 
 func delProxy(laddr string, lport int) error {
-	return proxy.StopProxy(laddr, lport)
+	raddr, rport, err := proxy.StopProxy(laddr, lport)
+	if err != nil {
+		return err
+	}
+
+	takina := GetTakina()
+
+	node, err := takina.GetNodeByAddress(raddr)
+	if err != nil {
+		return err
+	}
+
+	resp, err := helper.SendPostAndParse[types.TakinaResponseWarp[types.TakinaResponseReleasePort]](
+		node.GenerateUrl(types.ROUTER_TAKINA_SERVER_RELEASE_PORT),
+		helper.HttpPayloadJson(GetPackedRequest(takina, types.TakinaRequestReleasePort{
+			Port: rport,
+		})),
+		helper.HttpTimeout(2000),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if resp.Error() != nil {
+		return resp.Error()
+	}
+
+	return nil
 }
 
 func listProxy() []proxy.Proxy {

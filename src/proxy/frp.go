@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Yeuoly/Takina/src/helper"
 	"github.com/Yeuoly/Takina/src/types"
 )
 
@@ -32,7 +33,7 @@ type FrpcNote struct {
 	Pass           string `yaml:"pass"`
 	OriginalConfig string
 	CurrentProxy   map[string]Proxy
-	mtx            sync.RWMutex
+	mtx            *sync.RWMutex
 }
 
 type FrpcTcpConfig struct {
@@ -89,6 +90,19 @@ type TakinaConfig struct {
 
 var globalConfig TakinaConfig
 
+func LoadTakinaFrpc(nodes []*types.FrpcConfig) {
+	globalConfig.ClientNotes = make([]FrpcNote, len(nodes))
+	for i, v := range nodes {
+		globalConfig.ClientNotes[i].Address = v.AdminAddr
+		globalConfig.ClientNotes[i].Port = v.AdminPort
+		globalConfig.ClientNotes[i].User = v.AdminUser
+		globalConfig.ClientNotes[i].Pass = v.AdminPwd
+		globalConfig.ClientNotes[i].mtx = &sync.RWMutex{}
+	}
+
+	loadDefaultProxy()
+}
+
 func loadDefaultProxy() {
 	// load orginal config and current proxy
 	for i := range globalConfig.ClientNotes {
@@ -96,6 +110,7 @@ func loadDefaultProxy() {
 
 		config_content := GetFrpConfig(&globalConfig.ClientNotes[i])
 		if config_content == "" {
+			helper.Error("[Proxy] load default proxy failed, config content is empty")
 			continue
 		}
 		//load only [common] section

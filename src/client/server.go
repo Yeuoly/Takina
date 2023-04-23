@@ -44,6 +44,8 @@ func InitTakinaClientDaemon() {
 	if global_takina_instance.TakinaPort == 0 {
 		helper.Panic("[Takina] takina_port is not set")
 	}
+
+	fmt.Println("[Takina] Takina client daemon initialized")
 }
 
 func (root *Takina) setupRouter(server *gin.Engine) {
@@ -57,16 +59,16 @@ func (root *Takina) Run() {
 	root.RunFrpcDeamon()
 
 	// launch server and listen
-	server := gin.Default()
-	root.setupRouter(server)
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
-
 	var err error
 	gin.DefaultWriter, err = os.Create(os.DevNull)
 	if err != nil {
 		helper.Panic("[Takina] Failed to ignore log info: " + err.Error())
 	}
+
+	server := gin.Default()
+	root.setupRouter(server)
 
 	server.Run(fmt.Sprintf(":%d", root.TakinaPort))
 }

@@ -6,52 +6,37 @@ import (
 	"github.com/Yeuoly/Takina/src/helper"
 )
 
-func (c *Takina) requestAvailablePort(callbacks ...[]func()) (int, error) {
+func (c *Takina) requestAvailablePort() (int, error) {
 	c.requestPortMutex.Lock()
 	defer c.requestPortMutex.Unlock()
 
 	if c.PortPool.Len() == 0 {
 		// release callback
-		if len(callbacks) > 0 {
-			for _, cb := range callbacks[0] {
-				cb()
-			}
-		}
-
 		return 0, errors.New("no available port")
 	}
 
-	e := c.PortPool.Front()
-	c.PortPool.Remove(e)
+	first_port := 0
 
-	port := e.Value.(int)
+	for {
+		e := c.PortPool.Front()
+		c.PortPool.Remove(e)
 
-	if !helper.TestPortAvailable(port) {
-		helper.Warn("[Takina] port %d is not available, try next", port)
-		if len(callbacks) > 0 {
-			callbacks[0] = append(callbacks[0], func() {
-				c.PortPool.PushBack(port)
-			})
-
-			return c.requestAvailablePort(callbacks[0])
-		} else {
-			callbacks = append(callbacks, []func(){
-				func() {
-					c.PortPool.PushBack(port)
-				},
-			})
-			return c.requestAvailablePort(callbacks[0])
+		port := e.Value.(int)
+		if first_port == 0 {
+			first_port = port
+		} else if port == first_port {
+			c.PortPool.PushBack(port)
+			return 0, errors.New("no available port")
 		}
-	}
 
-	// release callback
-	if len(callbacks) > 0 {
-		for _, cb := range callbacks[0] {
-			cb()
+		// check if port is available
+		if helper.TestPortAvailable(port) {
+			return port, nil
 		}
-	}
 
-	return e.Value.(int), nil
+		// if not available, release it
+		c.PortPool.PushBack(port)
+	}
 }
 
 func (c *Takina) releasePort(port int) error {

@@ -1,10 +1,12 @@
 package server
 
 import (
-	"fmt"
+	"errors"
+	"math/rand"
 
 	"github.com/Yeuoly/Takina/src/frpcdaemon"
 	"github.com/Yeuoly/Takina/src/helper"
+	"github.com/Yeuoly/Takina/src/proxy"
 	"github.com/Yeuoly/Takina/src/types"
 )
 
@@ -18,8 +20,6 @@ func (c *Takina) InitFrpcConfig(node TakinaNode) (*types.FrpcConfig, error) {
 		helper.HttpPayloadJson(GetPackedRequest(c, types.TakinaRequestGetFrpsConfig{})),
 		helper.HttpTimeout(2000),
 	)
-
-	fmt.Println(resp)
 
 	if err != nil {
 		return nil, err
@@ -52,9 +52,22 @@ func (c *Takina) RunFrpcDeamon() {
 
 	var err error
 	helper.Info("[Takina] launching frpc daemon...")
-	c.Frpcs, err = frpcdaemon.LaunchFrpcDaemon(c.Frpcs)
+	c.Frpcs, err = frpcdaemon.LaunchFrpcDaemon(c.Frpcs, func() {
+		// connect to frpc daemon
+		proxy.LoadTakinaFrpc(c.Frpcs)
+	})
 	if err != nil {
 		helper.Panic("[Takina] failed to launch frpc daemon: %s", err.Error())
 	}
+
 	helper.Info("[Takina] frpc daemon launched")
+}
+
+func (c *Takina) RandomNode() (*TakinaNode, error) {
+	if len(c.Nodes) == 0 {
+		return nil, errors.New("no node available")
+	}
+
+	idx := rand.Intn(len(c.Nodes))
+	return &c.Nodes[idx], nil
 }

@@ -8,7 +8,7 @@ import (
 
 func BaiscController[T any](r *gin.Context, success func(T)) {
 	helper.BindRequest(r, func(request types.TakinaRequest[T]) {
-		if GetTakina().Auth(request.Token) {
+		if !GetTakina().Auth(request.Token) {
 			r.JSON(200, types.ErrorResponse(-403, "token error"))
 		} else {
 			success(request.Data)

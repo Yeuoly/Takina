@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"time"
 
 	"github.com/Yeuoly/Takina/src/helper"
 	"github.com/Yeuoly/Takina/src/types"
@@ -26,7 +27,8 @@ admin_pwd = %s
 // LaunchFrpcDaemon will launch all frpc daemon in the configs
 // frpc daemon will be launched in serveral goroutines, so it will return immediately
 // the return value is the configs with admin info
-func LaunchFrpcDaemon(configs []*types.FrpcConfig) ([]*types.FrpcConfig, error) {
+// hooks[1] = started hook
+func LaunchFrpcDaemon(configs []*types.FrpcConfig, hooks ...func()) ([]*types.FrpcConfig, error) {
 	for _, config := range configs {
 		admin_user := helper.RandomStr(8)
 		admin_pass := helper.RandomStr(16)
@@ -63,6 +65,7 @@ func LaunchFrpcDaemon(configs []*types.FrpcConfig) ([]*types.FrpcConfig, error) 
 		}
 
 		cmd := frpc.Command("-c", frpc_file_name)
+		started := false
 		go func() {
 			stdout, err := cmd.StdoutPipe()
 			if err != nil {
@@ -96,6 +99,14 @@ func LaunchFrpcDaemon(configs []*types.FrpcConfig) ([]*types.FrpcConfig, error) 
 						break
 					}
 					helper.Info("[%s] %s", module, string(buf[:n]))
+					if !started {
+						started = true
+						if len(hooks) > 0 {
+							time.AfterFunc(50*time.Millisecond, func() {
+								go hooks[0]()
+							})
+						}
+					}
 				}
 			}
 

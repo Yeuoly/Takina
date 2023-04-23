@@ -21,7 +21,7 @@ func (f *FrpAdmin) GetFrpStatus(note *FrpcNote) StatusResponse {
 func (f *FrpAdmin) LaunchProxy(note *FrpcNote, laddr string, lport int, raddr string, rport int, protocol string) error {
 	note.mtx.RLock()
 	for _, i := range note.CurrentProxy {
-		if (i.Laddr == laddr && i.Lport == lport) || (i.Raddr == raddr && i.Rport == rport) {
+		if i.Raddr == raddr && i.Rport == rport {
 			note.mtx.RUnlock()
 			return errors.New("proxy already exists")
 		}
@@ -93,8 +93,7 @@ func (f *FrpAdmin) Reload(note *FrpcNote) error {
 		return err
 	}
 
-	//wait 1s to ensure config file is written
-	time.Sleep(time.Second)
+	//time.Sleep(time.Millisecond * 50)
 
 	//reload
 	_, err = ReloadFrp(note)
@@ -143,29 +142,32 @@ func init() {
 	rand.Seed(time.Now().Unix())
 }
 
-func AutoLaunchProxy(laddr string, lport int, protocol string) (string, int, error) {
-	raddr := ""
-	rport := 0
-	idx := rand.Int31() % int32(len(globalConfig.ClientNotes))
-	raddr = globalConfig.ClientNotes[idx].RAddress
-	findport := false
-	for !findport {
-		rport = rand.Intn(40000-25590) + 25590
-		err := LaunchProxy(laddr, lport, raddr, rport, protocol)
-		if err == nil {
-			findport = true
+func AutoLaunchProxy(laddr string, lport int, protocol string, raddr string, rport int) (string, int, error) {
+	if len(globalConfig.ClientNotes) == 0 {
+		return "", 0, errors.New("no client note")
+	}
+	// find raddr's note
+	idx := -1
+	for i, v := range globalConfig.ClientNotes {
+		if v.RAddress == raddr {
+			idx = i
+			break
 		}
-		if err != nil && (err.Error() != "proxy already exists" || err.Error() != "unavailable proxy") {
-			return "", 0, err
-		}
+	}
+
+	if idx == -1 {
+		return "", 0, errors.New("no client note")
+	}
+
+	err := LaunchProxy(&globalConfig.ClientNotes[idx], laddr, lport, raddr, rport, protocol)
+	if err != nil {
+		return "", 0, err
 	}
 	return raddr, rport, nil
 }
 
-func LaunchProxy(laddr string, lport int, raddr string, rport int, protocol string) error {
-	idx := rand.Int31() % int32(len(globalConfig.ClientNotes))
-	note := &globalConfig.ClientNotes[idx]
-	return defaultAdmin.LaunchProxy(note, laddr, lport, raddr, rport, protocol)
+func LaunchProxy(node *FrpcNote, laddr string, lport int, raddr string, rport int, protocol string) error {
+	return defaultAdmin.LaunchProxy(node, laddr, lport, raddr, rport, protocol)
 }
 
 func StopProxy(laddr string, lport int) error {
